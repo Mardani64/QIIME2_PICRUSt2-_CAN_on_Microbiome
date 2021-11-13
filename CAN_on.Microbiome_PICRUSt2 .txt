@@ -1,0 +1,58 @@
+
+
+#installing the Picrust2 on ubuntu
+
+conda install q2-picrust2=2019.7 -c conda-forge -c bioconda -c gavinmdouglas 
+
+######for this workflow we have to create another env and install qiime2.2019.7 (to be russing it on qiime2.2019.7 version only)
+#then install q2-picrust2=2019.7. 
+
+qiime feature-table filter-samples \
+  --i-table table.qza \
+  --m-metadata-file metadata_CAN.txt \
+  --p-where "[Conc] IN ('control', 'high')" \
+  --o-filtered-table CAN-filtered-con-vs-high.qza
+
+qiime composition add-pseudocount \
+  --i-table CAN-filtered-con-vs-high.qza \
+  --o-composition-table comp-CAN-table.qza
+
+
+qiime taxa collapse \
+   --i-table CAN-filtered-con-vs-high.qza \
+   --i-taxonomy taxonomy.qza \
+   --p-level 2 \
+   --o-collapsed-table CAN-table-L2.qza
+
+qiime composition add-pseudocount \
+  --i-table CAN-table-L2.qza \
+  --o-composition-table comp-CAN-table-L2.qza
+
+qiime composition ancom \
+  --i-table comp-CAN-table-L2.qza \
+  --m-metadata-file metadata_CAN.txt \
+  --m-metadata-column Conc \
+  --o-visualization L2-ancom-Conc.qz 
+
+
+qiime composition add-pseudocount \
+   --i-table CAN-table-L2.qza \
+   --o-composition-table comp-CAN-table-L2.qza
+
+qiime composition ancom \
+   --i-table comp-CAN-table-L2.qza \
+   --m-metadata-file metadata_CAN.txt \
+   --m-metadata-column Conc \
+   --o-visualization L2-ancom-Conc.qz
+
+
+
+qiime picrust2 full-pipeline \
+ --i-table table.qza \
+ --i-seq rep-seqs.qza \
+ --output-dir q2-picrust2_output \
+ --p-threads 2 \
+ --p-hsp-method mp \
+ --p-max-nsti 2 \
+ --verbose
+
